@@ -21,7 +21,7 @@ class HiveHeader {
             <div class="flex items-center">
               <div class="w-10 h-10 rounded-lg flex items-center justify-center mr-3">
                 <!-- Bee Logo -->
-                <img src="./bee-logo.png" alt="bee logo" />
+                <img src="../assets/bee-logo.png" alt="bee logo" />
               </div>
               <div>
                 <h1 class="text-xl font-bold text-slate-800">Hive Network</h1>
@@ -166,57 +166,43 @@ class HiveHeader {
       });
     });
 
-    // ENFORCE IMMEDIATE SWITCH AT 1024px
     const enforceResponsiveSwitch = () => {
       const desktopNav = document.querySelector('nav[class*="hidden"][class*="lg:flex"]');
       const desktopUserMenu = document.querySelector(".hidden.lg\\:flex");
       const mobileContainer = document.querySelector(".lg\\:hidden");
 
-      console.log("Window width:", window.innerWidth);
-      console.log("Desktop nav found:", !!desktopNav);
-      console.log("Mobile container found:", !!mobileContainer);
-
       if (window.innerWidth >= 1024) {
         // Desktop mode
-        console.log("Switching to desktop mode");
         if (desktopNav) {
           desktopNav.style.display = "flex";
-          console.log("Desktop nav shown");
         }
         if (desktopUserMenu) {
           desktopUserMenu.style.display = "flex";
-          console.log("Desktop user menu shown");
         }
         if (mobileContainer) {
           mobileContainer.style.display = "none";
-          console.log("Mobile container hidden");
         }
         if (mobileMenu) {
           mobileMenu.classList.add("hidden");
-          mobileMenu.style.display = "none";
-          console.log("Mobile menu hidden");
+          // Don't set display: none - let CSS handle it
         }
         if (mobileMenuButton) {
           mobileMenuButton.innerHTML = '<i class="fas fa-bars text-xl"></i>';
         }
       } else {
         // Mobile mode
-        console.log("Switching to mobile mode");
         if (desktopNav) {
           desktopNav.style.display = "none";
-          console.log("Desktop nav hidden");
         }
         if (desktopUserMenu) {
           desktopUserMenu.style.display = "none";
-          console.log("Desktop user menu hidden");
         }
         if (mobileContainer) {
           mobileContainer.style.display = "flex";
-          console.log("Mobile container shown");
         }
+        // Don't force mobile menu display - let the toggle handle it
       }
     };
-
     // Run on load and resize
     enforceResponsiveSwitch();
     window.addEventListener("resize", enforceResponsiveSwitch);

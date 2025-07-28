@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Directory - Hive Network</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+
+    <!-- Firebase SDKs -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script> -->
+
+    <!-- Include Header Component -->
+    <link rel="stylesheet" href="../header.css" />
+    <script src="../header.js"></script>
+
+    <style>
+      :root {
+        --primary-color: #f59e0b;
+        --primary-dark: #d97706;
+        --primary-light: #fbbf24;
+        --accent-color: #10b981;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: #f8fafc;
+      }
+
+      .card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e2e8f0;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .member-card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+      }
+
+      .member-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+        border-color: #f59e0b;
+      }
+
+      .search-input {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 1rem 1rem 1rem 3rem;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        width: 100%;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        background: #fefefe;
+      }
+
+      .search-container {
+        position: relative;
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: 1.125rem;
+      }
+
+      .filter-btn {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        color: #64748b;
+      }
+
+      .filter-btn:hover {
+        border-color: #f59e0b;
+        color: #f59e0b;
+        background: #fef3c7;
+      }
+
+      .filter-btn.active {
+        background: #f59e0b;
+        border-color: #f59e0b;
+        color: white;
+      }
+
+      .member-avatar {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: white;
+        margin-bottom: 1rem;
+      }
+
+      .contact-btn {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+      }
+
+      .contact-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        color: white;
+      }
+
+      .contact-btn i {
+        margin-right: 0.5rem;
+      }
+
+      .secondary-btn {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+      }
+
+      .secondary-btn:hover {
+        background: #e2e8f0;
+        color: #475569;
+        transform: translateY(-1px);
+      }
+
+      .secondary-btn i {
+        margin-right: 0.5rem;
+      }
+
+      .specialty-tag {
+        background: #fef3c7;
+        color: #d97706;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: inline-block;
+        margin: 0.125rem;
+      }
+
+      .fade-in {
+        animation: fadeIn 0.6s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .slide-in-up {
+        animation: slideInUp 0.6s ease-out;
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .no-results {
+        text-align: center;
+        padding: 3rem;
+        color: #64748b;
+      }
+
+      .no-results i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #cbd5e1;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-900">
+    <!-- Header will be inserted here by the component -->
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Page Header -->
+      <div class="mb-8 slide-in-up">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div class="mb-4 sm:mb-0">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">Member Directory</h1>
+            <p class="text-lg text-gray-600">Connect with fellow Hive Network members in Saint George</p>
+          </div>
+          <div class="flex items-center space-x-4">
+            <span class="text-sm text-gray-500">Total Members:</span>
+            <span id="member-count" class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-semibold text-sm">24</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search and Filters -->
+      <div class="mb-8 card p-6 fade-in">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:space-x-6 space-y-4 lg:space-y-0">
+          <!-- Search Input -->
+          <div class="search-container flex-1">
+            <i class="fas fa-search search-icon"></i>
+            <input id="search-input" type="text" placeholder="Search by name, business, or service..." class="search-input" />
+          </div>
+
+          <!-- Industry Filters -->
+          <div class="flex flex-wrap gap-2">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="health">Health & Fitness</button>
+            <button class="filter-btn" data-filter="professional">Professional Services</button>
+            <button class="filter-btn" data-filter="retail">Retail & Sales</button>
+            <button class="filter-btn" data-filter="tech">Technology</button>
+            <button class="filter-btn" data-filter="food">Food & Beverage</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Members Grid -->
+      <div id="members-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
+        <!-- Member cards will be populated by JavaScript -->
+      </div>
+
+      <!-- No Results Message -->
+      <div id="no-results" class="hidden">
+        <div class="no-results">
+          <i class="fas fa-search"></i>
+          <h3 class="text-xl font-semibold text-slate-900 mb-2">No members found</h3>
+          <p class="text-gray-600">Try adjusting your search criteria or filters</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions Card -->
+      <div class="mt-12 card p-8 text-center">
+        <div class="max-w-2xl mx-auto">
+          <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+            <i class="fas fa-users text-white text-2xl"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900 mb-4">Ready to Connect?</h2>
+          <p class="text-gray-600 leading-relaxed mb-6">Building relationships is at the heart of the Hive Network. Reach out to fellow members and start creating valuable business connections today.</p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="referrals.html" class="contact-btn">
+              <i class="fas fa-gift"></i>
+              Make a Referral
+            </a>
+            <a href="meetings.html" class="secondary-btn">
+              <i class="fas fa-calendar"></i>
+              View Meetings
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // Firebase Configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyDLvSac-aX8I9ueFbhoRDNPHm2hDqp_LF0",
+        authDomain: "buzz-academy.firebaseapp.com",
+        projectId: "buzz-academy",
+        storageBucket: "buzz-academy.appspot.com",
+        messagingSenderId: "769027718689",
+        appId: "1:769027718689:web:0f3fc5c4283ef729dfed60",
+        measurementId: "G-KLXYN53G1X",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      // Mock member data
+      const mockMembers = [
+        {
+          id: 1,
+          name: "Sarah Miller",
+          business: "Miller Web Design",
+          industry: "tech",
+          specialties: ["Web Development", "UI/UX Design", "E-commerce"],
+          phone: "(435) 555-0123",
+          email: "sarah@millerwebdesign.com",
+          location: "Saint George, UT",
+          joinedDate: "2023-01-15",
+          referralsGiven: 12,
+          referralsReceived: 8,
+        },
+        {
+          id: 2,
+          name: "Mike Chen",
+          business: "Chen's Restaurant Group",
+          industry: "food",
+          specialties: ["Fine Dining", "Catering", "Event Planning"],
+          phone: "(435) 555-0234",
+          email: "mike@chensrestaurants.com",
+          location: "Saint George, UT",
+          joinedDate: "2022-11-20",
+          referralsGiven: 18,
+          referralsReceived: 15,
+        },
+        {
+          id: 3,
+          name: "Jennifer Park",
+          business: "Park Financial Advisors",
+          industry: "professional",
+          specialties: ["Financial Planning", "Investment Management", "Tax Planning"],
+          phone: "(435) 555-0345",
+          email: "jennifer@parkfinancial.com",
+          location: "Saint George, UT",
+          joinedDate: "2023-03-08",
+          referralsGiven: 9,
+          referralsReceived: 11,
+        },
+        {
+          id: 4,
+          name: "David Rodriguez",
+          business: "Rodriguez Law Firm",
+          industry: "professional",
+          specialties: ["Business Law", "Real Estate", "Estate Planning"],
+          phone: "(435) 555-0456",
+          email: "david@rodriguezlaw.com",
+          location: "Saint George, UT",
+          joinedDate: "2022-09-12",
+          referralsGiven: 22,
+          referralsReceived: 19,
+        },
+        {
+          id: 5,
+          name: "Lisa Thompson",
+          business: "Thompson Fitness Studio",
+          industry: "health",
+          specialties: ["Personal Training", "Nutrition Coaching", "Group Classes"],
+          phone: "(435) 555-0567",
+          email: "lisa@thompsonfitness.com",
+          location: "Saint George, UT",
+          joinedDate: "2023-02-28",
+          referralsGiven: 7,
+          referralsReceived: 6,
+        },
+        {
+          id: 6,
+          name: "Alex Kim",
+          business: "Kim's Auto Repair",
+          industry: "retail",
+          specialties: ["Auto Repair", "Tire Services", "Oil Changes"],
+          phone: "(435) 555-0678",
+          email: "alex@kimsauto.com",
+          location: "Saint George, UT",
+          joinedDate: "2023-01-10",
+          referralsGiven: 14,
+          referralsReceived: 12,
+        },
+        {
+          id: 7,
+          name: "Maria Gonzalez",
+          business: "Gonzalez Real Estate",
+          industry: "professional",
+          specialties: ["Residential Sales", "Commercial Properties", "Property Management"],
+          phone: "(435) 555-0789",
+          email: "maria@gonzalezrealty.com",
+          location: "Saint George, UT",
+          joinedDate: "2022-12-05",
+          referralsGiven: 25,
+          referralsReceived: 20,
+        },
+        {
+          id: 8,
+          name: "Tom Wilson",
+          business: "Wilson Dental Care",
+          industry: "health",
+          specialties: ["General Dentistry", "Cosmetic Dentistry", "Orthodontics"],
+          phone: "(435) 555-0890",
+          email: "tom@wilsondental.com",
+          location: "Saint George, UT",
+          joinedDate: "2023-04-15",
+          referralsGiven: 5,
+          referralsReceived: 4,
+        },
+      ];
+
+      let filteredMembers = [...mockMembers];
+      let currentFilter = "all";
+
+      // DOM Elements
+      const membersGrid = document.getElementById("members-grid");
+      const searchInput = document.getElementById("search-input");
+      const filterButtons = document.querySelectorAll(".filter-btn");
+      const memberCount = document.getElementById("member-count");
+      const noResults = document.getElementById("no-results");
+
+      // Generate member initials
+      function getInitials(name) {
+        return name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase();
+      }
+
+      // Generate member card HTML
+      function createMemberCard(member) {
+        return `
+          <div class="member-card p-6" data-member-id="${member.id}">
+            <div class="flex flex-col items-center text-center">
+              <div class="member-avatar">
+                ${getInitials(member.name)}
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 mb-1">${member.name}</h3>
+              <p class="text-amber-600 font-semibold mb-2">${member.business}</p>
+              <p class="text-gray-600 text-sm mb-4">${member.location}</p>
+              
+              <div class="flex flex-wrap justify-center mb-4">
+                ${member.specialties.map((specialty) => `<span class="specialty-tag">${specialty}</span>`).join("")}
+              </div>
+              
+              <div class="flex flex-col sm:flex-row gap-2 w-full">
+                <a href="tel:${member.phone}" class="contact-btn flex-1">
+                  <i class="fas fa-phone"></i>
+                  Call
+                </a>
+                <a href="mailto:${member.email}" class="secondary-btn flex-1">
+                  <i class="fas fa-envelope"></i>
+                  Email
+                </a>
+              </div>
+              
+              <div class="mt-4 pt-4 border-t border-gray-100 w-full">
+                <div class="flex justify-between text-sm text-gray-500">
+                  <span>Given: ${member.referralsGiven}</span>
+                  <span>Received: ${member.referralsReceived}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Render members grid
+      function renderMembers(members) {
+        if (members.length === 0) {
+          membersGrid.classList.add("hidden");
+          noResults.classList.remove("hidden");
+        } else {
+          membersGrid.classList.remove("hidden");
+          noResults.classList.add("hidden");
+          membersGrid.innerHTML = members.map(createMemberCard).join("");
+        }
+
+        memberCount.textContent = members.length;
+      }
+
+      // Filter members by industry
+      function filterByIndustry(industry) {
+        currentFilter = industry;
+        applyFilters();
+
+        // Update filter button states
+        filterButtons.forEach((btn) => {
+          btn.classList.remove("active");
+          if (btn.dataset.filter === industry) {
+            btn.classList.add("active");
+          }
+        });
+      }
+
+      // Search members
+      function searchMembers(query) {
+        if (!query.trim()) {
+          filteredMembers = mockMembers.filter((member) => currentFilter === "all" || member.industry === currentFilter);
+        } else {
+          const searchTerm = query.toLowerCase();
+          filteredMembers = mockMembers.filter((member) => {
+            const matchesFilter = currentFilter === "all" || member.industry === currentFilter;
+            const matchesSearch = member.name.toLowerCase().includes(searchTerm) || member.business.toLowerCase().includes(searchTerm) || member.specialties.some((specialty) => specialty.toLowerCase().includes(searchTerm));
+
+            return matchesFilter && matchesSearch;
+          });
+        }
+
+        renderMembers(filteredMembers);
+      }
+
+      // Apply current filters
+      function applyFilters() {
+        const query = searchInput.value;
+        searchMembers(query);
+      }
+
+      // Initialize page
+      function initializeDirectory() {
+        renderMembers(mockMembers);
+
+        // Search input listener
+        searchInput.addEventListener("input", (e) => {
+          searchMembers(e.target.value);
+        });
+
+        // Filter button listeners
+        filterButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            filterByIndustry(btn.dataset.filter);
+          });
+        });
+      }
+
+      // Check authentication and redirect if not logged in
+      function requireAuth() {
+        auth.onAuthStateChanged((user) => {
+          if (!user) {
+            window.location.href = "index.html";
+          } else {
+            initializeDirectoryPage(user);
+          }
+        });
+      }
+
+      // Initialize directory page with user data
+      function initializeDirectoryPage(user) {
+        // Update user info in header using the component
+        hiveHeader.updateUserInfo(user);
+
+        // Initialize directory functionality
+        initializeDirectory();
+      }
+
+      // Initialize page when DOM loads
+      document.addEventListener("DOMContentLoaded", () => {
+        requireAuth();
+      });
+    </script>
+  </body>
+</html>

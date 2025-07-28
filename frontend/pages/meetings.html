@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Meetings - Hive Network</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+
+    <!-- Firebase SDKs -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script> -->
+
+    <!-- Include Header Component -->
+    <link rel="stylesheet" href="../header.css" />
+    <script src="../header.js"></script>
+
+    <style>
+      :root {
+        --primary-color: #f59e0b;
+        --primary-dark: #d97706;
+        --primary-light: #fbbf24;
+        --accent-color: #10b981;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: #f8fafc;
+      }
+
+      .card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e2e8f0;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .meeting-card {
+        background: white;
+        border-radius: 1rem;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .meeting-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+        border-color: #f59e0b;
+      }
+
+      .meeting-card.featured {
+        border: 2px solid #f59e0b;
+        background: linear-gradient(135deg, #fef3c7 0%, #ffffff 100%);
+      }
+
+      .meeting-card.past {
+        opacity: 0.8;
+        border-color: #d1d5db;
+      }
+
+      .meeting-date {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        padding: 1rem;
+        text-align: center;
+        font-weight: 600;
+        min-width: 120px;
+      }
+
+      .meeting-date.past {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      }
+
+      .primary-btn {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        cursor: pointer;
+      }
+
+      .primary-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+        color: white;
+      }
+
+      .primary-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .primary-btn i {
+        margin-right: 0.5rem;
+      }
+
+      .secondary-btn {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 2px solid #e2e8f0;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        cursor: pointer;
+      }
+
+      .secondary-btn:hover {
+        background: #e2e8f0;
+        color: #475569;
+        transform: translateY(-1px);
+      }
+
+      .secondary-btn i {
+        margin-right: 0.5rem;
+      }
+
+      .tab-button {
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        color: #64748b;
+        background: #f8fafc;
+      }
+
+      .tab-button.active {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border-color: #d97706;
+      }
+
+      .tab-button:hover:not(.active) {
+        background: #f1f5f9;
+        color: #475569;
+      }
+
+      .status-badge {
+        padding: 0.375rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .status-upcoming {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      .status-today {
+        background: #fef3c7;
+        color: #d97706;
+      }
+
+      .status-past {
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+
+      .status-registered {
+        background: #d1fae5;
+        color: #047857;
+      }
+
+      .attendee-avatar {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+        border: 2px solid white;
+        margin-left: -0.5rem;
+      }
+
+      .attendee-count {
+        background: #e5e7eb;
+        color: #6b7280;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+      }
+
+      .fade-in {
+        animation: fadeIn 0.6s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .slide-in-up {
+        animation: slideInUp 0.6s ease-out;
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-right: 8px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .meeting-type-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .type-networking {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      .type-workshop {
+        background: #f3e8ff;
+        color: #7c3aed;
+      }
+
+      .type-social {
+        background: #fef3c7;
+        color: #d97706;
+      }
+
+      .type-training {
+        background: #d1fae5;
+        color: #047857;
+      }
+
+      .calendar-view {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        background: #e5e7eb;
+        border-radius: 0.5rem;
+        overflow: hidden;
+      }
+
+      .calendar-day {
+        background: white;
+        padding: 0.75rem;
+        min-height: 100px;
+        position: relative;
+      }
+
+      .calendar-day.other-month {
+        background: #f9fafb;
+        color: #9ca3af;
+      }
+
+      .calendar-day.today {
+        background: #fef3c7;
+      }
+
+      .calendar-event {
+        background: #f59e0b;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+        cursor: pointer;
+      }
+
+      .stats-card {
+        background: linear-gradient(135deg, var(--bg-from), var(--bg-to));
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        text-align: center;
+      }
+
+      .stats-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 text-gray-900">
+    <!-- Header will be inserted here by the component -->
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Page Header -->
+      <div class="mb-8 slide-in-up">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div class="mb-4 sm:mb-0">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">Meetings & Events</h1>
+            <p class="text-lg text-gray-600">Connect, learn, and grow with fellow Hive Network members</p>
+          </div>
+          <div class="flex items-center space-x-4">
+            <span class="text-sm text-gray-500">Next Meeting:</span>
+            <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-semibold text-sm">Feb 15, 2024</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="mb-8 fade-in">
+        <div class="flex flex-wrap gap-2">
+          <button class="tab-button active" data-tab="upcoming">
+            <i class="fas fa-calendar-plus mr-2"></i>
+            Upcoming
+          </button>
+          <button class="tab-button" data-tab="my-meetings">
+            <i class="fas fa-user-check mr-2"></i>
+            My Meetings
+          </button>
+          <button class="tab-button" data-tab="past">
+            <i class="fas fa-history mr-2"></i>
+            Past Events
+          </button>
+          <button class="tab-button" data-tab="calendar">
+            <i class="fas fa-calendar mr-2"></i>
+            Calendar
+          </button>
+        </div>
+      </div>
+
+      <!-- Upcoming Meetings Tab -->
+      <div id="upcoming-tab" class="tab-content">
+        <div class="space-y-6 fade-in">
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="stats-card" style="--bg-from: #dbeafe; --bg-to: #bfdbfe; --border-color: #3b82f6">
+              <div class="text-3xl font-bold text-blue-700 mb-2">3</div>
+              <div class="text-sm text-blue-700">Upcoming Events</div>
+            </div>
+            <div class="stats-card" style="--bg-from: #d1fae5; --bg-to: #bbf7d0; --border-color: #10b981">
+              <div class="text-3xl font-bold text-emerald-700 mb-2">2</div>
+              <div class="text-sm text-emerald-700">Registered</div>
+            </div>
+            <div class="stats-card" style="--bg-from: #fef3c7; --bg-to: #fed7aa; --border-color: #f59e0b">
+              <div class="text-3xl font-bold text-amber-700 mb-2">12</div>
+              <div class="text-sm text-amber-700">Total Attended</div>
+            </div>
+            <div class="stats-card" style="--bg-from: #f3e8ff; --bg-to: #e9d5ff; --border-color: #8b5cf6">
+              <div class="text-3xl font-bold text-purple-700 mb-2">85%</div>
+              <div class="text-sm text-purple-700">Attendance Rate</div>
+            </div>
+          </div>
+
+          <!-- Featured Meeting -->
+          <div class="meeting-card featured p-0">
+            <div class="flex flex-col md:flex-row">
+              <div class="meeting-date">
+                <div class="text-2xl font-bold">15</div>
+                <div class="text-sm">FEB</div>
+                <div class="text-xs">2024</div>
+              </div>
+              <div class="flex-1 p-6">
+                <div class="flex items-start justify-between mb-4">
+                  <div>
+                    <div class="flex items-center space-x-2 mb-2">
+                      <span class="status-badge status-today">Today</span>
+                      <span class="text-amber-600 text-sm font-medium">6:00 PM - 8:00 PM</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Monthly Networking Mixer</h3>
+                    <p class="text-gray-600 mb-4">Join us for our monthly networking event featuring guest speaker Maria Rodriguez discussing "Building Strategic Partnerships in Local Business."</p>
+                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                      <span><i class="fas fa-map-marker-alt mr-1"></i>Dixie Center, St. George</span>
+                      <span><i class="fas fa-users mr-1"></i>32 attending</span>
+                      <span><i class="fas fa-utensils mr-1"></i>Dinner provided</span>
+                    </div>
+                  </div>
+                  <div class="meeting-type-icon type-networking">
+                    <i class="fas fa-handshake"></i>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div class="flex -space-x-2">
+                      <div class="attendee-avatar">SM</div>
+                      <div class="attendee-avatar">MC</div>
+                      <div class="attendee-avatar">JP</div>
+                      <div class="attendee-avatar">DR</div>
+                    </div>
+                    <span class="attendee-count">+28 more</span>
+                  </div>
+                  <button class="primary-btn" id="register-featured" onclick="registerForMeeting(1)">
+                    <i class="fas fa-check"></i>
+                    Registered
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Other Upcoming Meetings -->
+          <div id="upcoming-meetings-list" class="space-y-4">
+            <!-- Will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- My Meetings Tab -->
+      <div id="my-meetings-tab" class="tab-content hidden">
+        <div class="space-y-6 fade-in">
+          <div class="card p-6">
+            <h3 class="text-lg font-semibold text-slate-900 mb-4">Your Registered Events</h3>
+            <div id="registered-meetings-list" class="space-y-4">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Past Events Tab -->
+      <div id="past-tab" class="tab-content hidden">
+        <div class="space-y-6 fade-in">
+          <div class="card p-6">
+            <h3 class="text-lg font-semibold text-slate-900 mb-4">Previous Events</h3>
+            <div id="past-meetings-list" class="space-y-4">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendar Tab -->
+      <div id="calendar-tab" class="tab-content hidden">
+        <div class="space-y-6 fade-in">
+          <div class="card p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-semibold text-slate-900">February 2024</h3>
+              <div class="flex items-center space-x-2">
+                <button class="secondary-btn" onclick="changeMonth(-1)">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="secondary-btn" onclick="changeMonth(1)">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+            <div class="calendar-view" id="calendar-grid">
+              <!-- Will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Call to Action Card -->
+      <div class="mt-12 card p-8 text-center">
+        <div class="max-w-2xl mx-auto">
+          <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+            <i class="fas fa-calendar-plus text-white text-2xl"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900 mb-4">Never Miss an Event</h2>
+          <p class="text-gray-600 leading-relaxed mb-6">Stay connected with the Hive Network community by attending our regular meetings and special events. Build relationships, learn new skills, and grow your business network.</p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button class="primary-btn">
+              <i class="fas fa-bell"></i>
+              Enable Notifications
+            </button>
+            <a href="mailto:events@hivenetwork.com" class="secondary-btn">
+              <i class="fas fa-envelope"></i>
+              Suggest Event Topic
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // Firebase Configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyDLvSac-aX8I9ueFbhoRDNPHm2hDqp_LF0",
+        authDomain: "buzz-academy.firebaseapp.com",
+        projectId: "buzz-academy",
+        storageBucket: "buzz-academy.appspot.com",
+        messagingSenderId: "769027718689",
+        appId: "1:769027718689:web:0f3fc5c4283ef729dfed60",
+        measurementId: "G-KLXYN53G1X",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      // Mock meetings data
+      const mockUpcomingMeetings = [
+        {
+          id: 2,
+          title: "Digital Marketing Workshop",
+          date: "2024-02-22",
+          time: "6:30 PM - 8:30 PM",
+          type: "workshop",
+          location: "Innovation Hub, St. George",
+          description: "Learn the latest digital marketing strategies from local expert Sarah Miller. Perfect for business owners looking to expand their online presence.",
+          attendees: 18,
+          maxAttendees: 25,
+          speaker: "Sarah Miller",
+          registered: false,
+          features: ["Hands-on Activities", "Take-home Materials", "Q&A Session"],
+        },
+        {
+          id: 3,
+          title: "Coffee & Connections",
+          date: "2024-03-01",
+          time: "8:00 AM - 9:30 AM",
+          type: "social",
+          location: "Grind Coffee House",
+          description: "Casual morning networking over coffee. Perfect for making new connections in a relaxed atmosphere.",
+          attendees: 12,
+          maxAttendees: 20,
+          speaker: null,
+          registered: true,
+          features: ["Casual Setting", "Coffee Provided", "Open Networking"],
+        },
+        {
+          id: 4,
+          title: "Financial Planning Seminar",
+          date: "2024-03-08",
+          time: "7:00 PM - 9:00 PM",
+          type: "training",
+          location: "Red Canyon Conference Center",
+          description: "Master your business finances with expert guidance from Jennifer Park. Learn budgeting, tax strategies, and investment planning.",
+          attendees: 8,
+          maxAttendees: 30,
+          speaker: "Jennifer Park",
+          registered: false,
+          features: ["Expert Instruction", "Resource Packet", "Networking Time"],
+        },
+      ];
+
+      const mockPastMeetings = [
+        {
+          id: 101,
+          title: "New Year Kickoff Mixer",
+          date: "2024-01-18",
+          time: "6:00 PM - 8:00 PM",
+          type: "networking",
+          location: "Dixie Center, St. George",
+          description: "Started the year right with goal setting and networking.",
+          attendees: 42,
+          speaker: "David Rodriguez",
+          attended: true,
+        },
+        {
+          id: 102,
+          title: "Social Media Best Practices",
+          date: "2024-01-25",
+          time: "6:30 PM - 8:30 PM",
+          type: "workshop",
+          location: "Innovation Hub, St. George",
+          description: "Workshop on effective social media strategies for local businesses.",
+          attendees: 28,
+          speaker: "Mike Chen",
+          attended: false,
+        },
+      ];
+
+      let currentUser = null;
+      let currentMonth = new Date().getMonth();
+      let currentYear = new Date().getFullYear();
+
+      // Tab functionality
+      function initializeTabs() {
+        const tabButtons = document.querySelectorAll(".tab-button");
+        const tabContents = document.querySelectorAll(".tab-content");
+
+        tabButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            const targetTab = button.dataset.tab;
+
+            // Update button states
+            tabButtons.forEach((btn) => btn.classList.remove("active"));
+            button.classList.add("active");
+
+            // Update content visibility
+            tabContents.forEach((content) => {
+              content.classList.add("hidden");
+              if (content.id === `${targetTab}-tab`) {
+                content.classList.remove("hidden");
+              }
+            });
+
+            // Load calendar if calendar tab is selected
+            if (targetTab === "calendar") {
+              renderCalendar();
+            }
+          });
+        });
+      }
+
+      // Get meeting type icon and color
+      function getMeetingTypeInfo(type) {
+        const types = {
+          networking: { icon: "fa-handshake", class: "type-networking" },
+          workshop: { icon: "fa-tools", class: "type-workshop" },
+          social: { icon: "fa-coffee", class: "type-social" },
+          training: { icon: "fa-graduation-cap", class: "type-training" },
+        };
+        return types[type] || types.networking;
+      }
+
+      // Format date for display
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+        return {
+          day: date.getDate(),
+          month: date.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
+          year: date.getFullYear(),
+        };
+      }
+
+      // Check if date is today
+      function isToday(dateString) {
+        const today = new Date();
+        const meetingDate = new Date(dateString);
+        return today.toDateString() === meetingDate.toDateString();
+      }
+
+      // Register for meeting
+      function registerForMeeting(meetingId) {
+        const button = event.target;
+        const isRegistered = button.textContent.includes("Registered");
+
+        if (isRegistered) {
+          // Unregister
+          button.innerHTML = '<i class="fas fa-plus mr-2"></i>Register';
+          button.classList.remove("secondary-btn");
+          button.classList.add("primary-btn");
+        } else {
+          // Register
+          button.innerHTML = '<div class="loading-spinner"></div>Registering...';
+          button.disabled = true;
+
+          setTimeout(() => {
+            button.innerHTML = '<i class="fas fa-check mr-2"></i>Registered';
+            button.disabled = false;
+            button.classList.remove("primary-btn");
+            button.classList.add("secondary-btn");
+          }, 1500);
+        }
+      }
+
+      // Render upcoming meetings
+      function renderUpcomingMeetings() {
+        const container = document.getElementById("upcoming-meetings-list");
+
+        container.innerHTML = mockUpcomingMeetings
+          .map((meeting) => {
+            const typeInfo = getMeetingTypeInfo(meeting.type);
+            const dateInfo = formatDate(meeting.date);
+            const statusClass = isToday(meeting.date) ? "status-today" : "status-upcoming";
+            const statusText = isToday(meeting.date) ? "Today" : "Upcoming";
+
+            return `
+            <div class="meeting-card p-0">
+              <div class="flex flex-col md:flex-row">
+                <div class="meeting-date">
+                  <div class="text-2xl font-bold">${dateInfo.day}</div>
+                  <div class="text-sm">${dateInfo.month}</div>
+                  <div class="text-xs">${dateInfo.year}</div>
+                </div>
+                <div class="flex-1 p-6">
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                      <div class="flex items-center space-x-2 mb-2">
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                        <span class="text-amber-600 text-sm font-medium">${meeting.time}</span>
+                      </div>
+                      <h3 class="text-lg font-bold text-slate-900 mb-2">${meeting.title}</h3>
+                      <p class="text-gray-600 mb-3">${meeting.description}</p>
+                      <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-3">
+                        <span><i class="fas fa-map-marker-alt mr-1"></i>${meeting.location}</span>
+                        <span><i class="fas fa-users mr-1"></i>${meeting.attendees}/${meeting.maxAttendees} attending</span>
+                        ${meeting.speaker ? `<span><i class="fas fa-microphone mr-1"></i>${meeting.speaker}</span>` : ""}
+                      </div>
+                      <div class="flex flex-wrap gap-2">
+                        ${meeting.features.map((feature) => `<span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">${feature}</span>`).join("")}
+                      </div>
+                    </div>
+                    <div class="meeting-type-icon ${typeInfo.class} ml-4">
+                      <i class="fas ${typeInfo.icon}"></i>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-500">
+                      ${meeting.maxAttendees - meeting.attendees} spots remaining
+                    </div>
+                    <button class="primary-btn" onclick="registerForMeeting(${meeting.id})">
+                      ${meeting.registered ? '<i class="fas fa-check mr-2"></i>Registered' : '<i class="fas fa-plus mr-2"></i>Register'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          })
+          .join("");
+      }
+
+      // Render registered meetings
+      function renderRegisteredMeetings() {
+        const container = document.getElementById("registered-meetings-list");
+        const registeredMeetings = mockUpcomingMeetings.filter((meeting) => meeting.registered);
+
+        if (registeredMeetings.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-8 text-gray-500">
+              <i class="fas fa-calendar-plus text-4xl mb-4"></i>
+              <p>No meetings registered yet. Check out upcoming events!</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = registeredMeetings
+          .map((meeting) => {
+            const typeInfo = getMeetingTypeInfo(meeting.type);
+            const dateInfo = formatDate(meeting.date);
+
+            return `
+            <div class="meeting-card p-6">
+              <div class="flex items-center space-x-4">
+                <div class="meeting-type-icon ${typeInfo.class}">
+                  <i class="fas ${typeInfo.icon}"></i>
+                </div>
+                <div class="flex-1">
+                  <h4 class="font-semibold text-slate-900 mb-1">${meeting.title}</h4>
+                  <p class="text-sm text-gray-600 mb-2">${meeting.date} • ${meeting.time}</p>
+                  <p class="text-xs text-gray-500">${meeting.location}</p>
+                </div>
+                <div class="text-right">
+                  <span class="status-badge status-registered">Registered</span>
+                  <button class="secondary-btn mt-2" onclick="addToCalendar('${meeting.title}', '${meeting.date}', '${meeting.time}')">
+                    <i class="fas fa-calendar-plus"></i>
+                    Add to Calendar
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+          })
+          .join("");
+      }
+
+      // Render past meetings
+      function renderPastMeetings() {
+        const container = document.getElementById("past-meetings-list");
+
+        container.innerHTML = mockPastMeetings
+          .map((meeting) => {
+            const typeInfo = getMeetingTypeInfo(meeting.type);
+            const dateInfo = formatDate(meeting.date);
+
+            return `
+            <div class="meeting-card past p-6">
+              <div class="flex items-center space-x-4">
+                <div class="meeting-date past">
+                  <div class="text-xl font-bold">${dateInfo.day}</div>
+                  <div class="text-xs">${dateInfo.month}</div>
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center space-x-2 mb-2">
+                    <h4 class="font-semibold text-slate-900">${meeting.title}</h4>
+                    <span class="status-badge ${meeting.attended ? "status-registered" : "status-past"}">
+                      ${meeting.attended ? "Attended" : "Missed"}
+                    </span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-1">${meeting.description}</p>
+                  <div class="flex items-center space-x-4 text-xs text-gray-500">
+                    <span><i class="fas fa-map-marker-alt mr-1"></i>${meeting.location}</span>
+                    <span><i class="fas fa-users mr-1"></i>${meeting.attendees} attended</span>
+                    ${meeting.speaker ? `<span><i class="fas fa-microphone mr-1"></i>${meeting.speaker}</span>` : ""}
+                  </div>
+                </div>
+                ${
+                  meeting.attended
+                    ? `
+                  <button class="secondary-btn">
+                    <i class="fas fa-star"></i>
+                    Rate Event
+                  </button>
+                `
+                    : ""
+                }
+              </div>
+            </div>
+          `;
+          })
+          .join("");
+      }
+
+      // Render calendar
+      function renderCalendar() {
+        const container = document.getElementById("calendar-grid");
+        const firstDay = new Date(currentYear, currentMonth, 1);
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        // Update month header
+        document.querySelector("#calendar-tab h3").textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+        // Generate calendar days
+        let calendarHTML = "";
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        // Add day headers
+        dayNames.forEach((day) => {
+          calendarHTML += `<div class="calendar-day" style="background: #f3f4f6; font-weight: 600; text-align: center; padding: 0.5rem;">${day}</div>`;
+        });
+
+        // Add calendar days
+        const currentDate = new Date(startDate);
+        for (let i = 0; i < 42; i++) {
+          const isCurrentMonth = currentDate.getMonth() === currentMonth;
+          const isToday = currentDate.toDateString() === new Date().toDateString();
+
+          let dayClass = "calendar-day";
+          if (!isCurrentMonth) dayClass += " other-month";
+          if (isToday) dayClass += " today";
+
+          let dayHTML = `<div class="${dayClass}">
+            <div>${currentDate.getDate()}</div>`;
+
+          // Add events for this day
+          const dateString = currentDate.toISOString().split("T")[0];
+          const dayEvents = mockUpcomingMeetings.filter((meeting) => meeting.date === dateString);
+
+          dayEvents.forEach((event) => {
+            dayHTML += `<div class="calendar-event" title="${event.title}">${event.title.substring(0, 15)}...</div>`;
+          });
+
+          dayHTML += "</div>";
+          calendarHTML += dayHTML;
+
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        container.innerHTML = calendarHTML;
+      }
+
+      // Change calendar month
+      function changeMonth(direction) {
+        currentMonth += direction;
+        if (currentMonth < 0) {
+          currentMonth = 11;
+          currentYear--;
+        } else if (currentMonth > 11) {
+          currentMonth = 0;
+          currentYear++;
+        }
+        renderCalendar();
+      }
+
+      // Add to calendar functionality
+      function addToCalendar(title, date, time) {
+        const startDate = new Date(date + " " + time.split(" - ")[0]);
+        const endDate = new Date(date + " " + time.split(" - ")[1]);
+
+        const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDate.toISOString().replace(/[-:]/g, "").split(".")[0]}Z/${endDate.toISOString().replace(/[-:]/g, "").split(".")[0]}Z&details=${encodeURIComponent("Hive Network Event")}`;
+
+        window.open(googleCalendarUrl, "_blank");
+      }
+
+      // Check authentication and redirect if not logged in
+      function requireAuth() {
+        auth.onAuthStateChanged((user) => {
+          if (!user) {
+            window.location.href = "index.html";
+          } else {
+            initializeMeetingsPage(user);
+          }
+        });
+      }
+
+      // Initialize meetings page with user data
+      function initializeMeetingsPage(user) {
+        currentUser = user;
+
+        // Update user info in header using the component
+        hiveHeader.updateUserInfo(user);
+
+        // Initialize page functionality
+        initializeTabs();
+        renderUpcomingMeetings();
+        renderRegisteredMeetings();
+        renderPastMeetings();
+      }
+
+      // Global functions for onclick handlers
+      window.registerForMeeting = registerForMeeting;
+      window.changeMonth = changeMonth;
+      window.addToCalendar = addToCalendar;
+
+      // Initialize page when DOM loads
+      document.addEventListener("DOMContentLoaded", () => {
+        requireAuth();
+      });
+    </script>
+  </body>
+</html>
