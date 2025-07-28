@@ -254,7 +254,7 @@ class HiveHeader {
         .signOut()
         .then(() => {
           sessionStorage.clear();
-          window.location.href = "index.html";
+          window.location.href = "../../index.html";
         });
     } else {
       // Fallback if Firebase is not available
