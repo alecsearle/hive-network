@@ -1,0 +1,126 @@
+/* header.css - Header Component Styles */
+
+/* Desktop Navigation */
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  color: #64748b;
+  text-decoration: none;
+  margin: 0 0.5rem;
+}
+
+.nav-link:hover {
+  color: #1e293b;
+  background-color: #f1f5f9;
+}
+
+.nav-link.active {
+  color: #f59e0b;
+  background-color: #fef3c7;
+  font-weight: 600;
+}
+
+.nav-link i {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.75rem;
+}
+
+/* Mobile Navigation */
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  color: #64748b;
+  text-decoration: none;
+  margin: 0.125rem 0;
+}
+
+.mobile-nav-link:hover {
+  color: #1e293b;
+  background-color: #f1f5f9;
+}
+
+.mobile-nav-link.active {
+  color: #f59e0b;
+  background-color: #fef3c7;
+  font-weight: 600;
+}
+
+.mobile-nav-link i {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.75rem;
+  text-align: center;
+}
+
+/* Mobile Menu Animation */
+#mobile-menu {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Force hide mobile menu on large screens */
+@media (min-width: 1024px) {
+  #mobile-menu {
+    display: none !important;
+  }
+
+  /* Ensure mobile elements are hidden */
+  .lg\:hidden {
+    display: none !important;
+  }
+}
+
+/* Force hide desktop nav on smaller screens */
+@media (max-width: 1023px) {
+  nav.hidden.lg\:flex {
+    display: none !important;
+  }
+
+  .hidden.lg\:flex {
+    display: none !important;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  /* Hide chapter name on tablet */
+  .hive-logo p {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Reduce logo text size on very small screens */
+  .hive-logo h1 {
+    font-size: 1.125rem;
+  }
+
+  /* Adjust notification badge size */
+  .notification-badge {
+    width: 1rem;
+    height: 1rem;
+    font-size: 0.625rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Further adjustments for very small screens */
+  .nav-link {
+    margin: 0 0.25rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .mobile-nav-link {
+    padding: 0.625rem 0.75rem;
+  }
+}

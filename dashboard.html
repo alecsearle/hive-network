@@ -2,10 +2,429 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard - Hive Network</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+
+    <!-- Firebase SDKs -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script> -->
+
+    <!-- Include Header Component -->
+    <link rel="stylesheet" href="header.css" />
+    <script src="header.js"></script>
+
+    <style>
+      :root {
+        --primary-color: #f59e0b;
+        --primary-dark: #d97706;
+        --primary-light: #fbbf24;
+        --accent-color: #10b981;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: #f8fafc;
+      }
+
+      .card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e2e8f0;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, var(--bg-from), var(--bg-to));
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .honey-badge {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        animation: pulse 3s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.9;
+        }
+      }
+
+      .quick-action-btn {
+        background: linear-gradient(135deg, var(--btn-from), var(--btn-to));
+        color: white;
+        border: none;
+        padding: 1rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+
+      .quick-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        color: white;
+      }
+
+      .quick-action-btn i {
+        margin-right: 0.5rem;
+      }
+
+      .slide-in-up {
+        animation: slideInUp 0.6s ease-out;
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.8s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .activity-item {
+        padding: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        transition: all 0.2s;
+      }
+
+      .activity-item:hover {
+        background-color: #f8fafc;
+      }
+
+      .activity-item:last-child {
+        border-bottom: none;
+      }
+    </style>
   </head>
-  <body>
-    <h1>Dashboard</h1>
+  <body class="bg-gray-50 text-gray-900">
+    <!-- Header will be inserted here by the component -->
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Welcome Section -->
+      <div class="mb-8 slide-in-up">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div class="mb-4 sm:mb-0">
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">Welcome back, <span id="welcome-name">John Smith</span>!</h1>
+            <p class="text-lg text-gray-600">You've given 12 honey referrals and received 8 this month.</p>
+          </div>
+          <div class="honey-badge">
+            <i class="fas fa-star mr-2"></i>
+            <span id="honey-points">45</span> Honey Points
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 fade-in">
+        <!-- Total Referrals Given -->
+        <div class="stat-card" style="--bg-from: #fef3c7; --bg-to: #fed7aa; --border-color: #f59e0b">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center">
+              <i class="fas fa-gift text-white text-xl"></i>
+            </div>
+            <span class="text-sm text-emerald-600 font-medium">+3 this month</span>
+          </div>
+          <h3 class="text-3xl font-bold text-amber-700 mb-1">12</h3>
+          <p class="text-sm text-amber-700 font-medium">Referrals Given</p>
+          <p class="text-xs text-amber-600 mt-1">Helping others grow</p>
+        </div>
+
+        <!-- Referrals Received -->
+        <div class="stat-card" style="--bg-from: #dcfce7; --bg-to: #bbf7d0; --border-color: #10b981">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center">
+              <i class="fas fa-arrow-down text-white text-xl"></i>
+            </div>
+            <span class="text-sm text-emerald-600 font-medium">+2 this month</span>
+          </div>
+          <h3 class="text-3xl font-bold text-emerald-700 mb-1">8</h3>
+          <p class="text-sm text-emerald-700 font-medium">Referrals Received</p>
+          <p class="text-xs text-emerald-600 mt-1">Growing your business</p>
+        </div>
+
+        <!-- New Members Introduced -->
+        <div class="stat-card" style="--bg-from: #dbeafe; --bg-to: #c7d2fe; --border-color: #3b82f6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+              <i class="fas fa-user-plus text-white text-xl"></i>
+            </div>
+            <span class="text-sm text-emerald-600 font-medium">+1 this month</span>
+          </div>
+          <h3 class="text-3xl font-bold text-blue-700 mb-1">3</h3>
+          <p class="text-sm text-blue-700 font-medium">Members Introduced</p>
+          <p class="text-xs text-blue-600 mt-1">Growing the hive</p>
+        </div>
+
+        <!-- Network Rank -->
+        <div class="stat-card" style="--bg-from: #f3e8ff; --bg-to: #e9d5ff; --border-color: #8b5cf6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+              <i class="fas fa-trophy text-white text-xl"></i>
+            </div>
+            <span class="text-sm text-emerald-600 font-medium">↑2 this month</span>
+          </div>
+          <h3 class="text-3xl font-bold text-purple-700 mb-1">#3</h3>
+          <p class="text-sm text-purple-700 font-medium">Network Rank</p>
+          <p class="text-xs text-purple-600 mt-1">Top performer</p>
+        </div>
+      </div>
+
+      <!-- Main Dashboard Content -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Quick Actions -->
+        <div class="card p-6">
+          <h3 class="text-lg font-semibold text-slate-900 mb-6 flex items-center">
+            <i class="fas fa-bolt text-amber-500 mr-2"></i>
+            Quick Actions
+          </h3>
+          <div class="space-y-4">
+            <a href="referrals.html" class="quick-action-btn" style="--btn-from: #f59e0b; --btn-to: #d97706">
+              <i class="fas fa-gift"></i>
+              Make a Referral
+            </a>
+            <a href="directory.html" class="quick-action-btn" style="--btn-from: #3b82f6; --btn-to: #1d4ed8">
+              <i class="fas fa-users"></i>
+              Browse Directory
+            </a>
+            <a href="meetings.html" class="quick-action-btn" style="--btn-from: #10b981; --btn-to: #047857">
+              <i class="fas fa-calendar"></i>
+              View Meetings
+            </a>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="lg:col-span-2 card overflow-hidden">
+          <div class="p-6 border-b border-gray-100">
+            <h3 class="text-lg font-semibold text-slate-900 flex items-center">
+              <i class="fas fa-clock text-amber-500 mr-2"></i>
+              Recent Activity
+            </h3>
+          </div>
+          <div id="recent-activity" class="max-h-80 overflow-y-auto">
+            <!-- Activity items will be populated by JavaScript -->
+          </div>
+          <div class="p-4 bg-gray-50 text-center border-t border-gray-100">
+            <a href="referrals.html" class="text-amber-600 hover:text-amber-700 text-sm font-medium transition-colors"> View All Activity → </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Welcome Message Card -->
+      <div class="mt-8 card p-8 text-center">
+        <div class="max-w-2xl mx-auto">
+          <div class="w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+            <i class="fas fa-heart text-white text-2xl"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-slate-900 mb-4">Welcome Message</h2>
+          <p class="text-gray-600 leading-relaxed mb-6">Welcome to the Saint George Hive Network! We're excited to have you as part of our growing community of local business professionals. Together, we're building stronger connections and helping each other succeed through the power of referrals.</p>
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-left">
+            <h4 class="font-semibold text-amber-800 mb-2">💡 Pro Tip:</h4>
+            <p class="text-amber-700 text-sm">The more referrals you give, the more honey points you earn! Quality referrals help build trust and strengthen our network. Remember: it's not just about what you get, but what you give to help others succeed.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // Firebase Configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyDLvSac-aX8I9ueFbhoRDNPHm2hDqp_LF0",
+        authDomain: "buzz-academy.firebaseapp.com",
+        projectId: "buzz-academy",
+        storageBucket: "buzz-academy.appspot.com",
+        messagingSenderId: "769027718689",
+        appId: "1:769027718689:web:0f3fc5c4283ef729dfed60",
+        measurementId: "G-KLXYN53G1X",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      // Mock data for development
+      const mockActivity = [
+        {
+          id: 1,
+          type: "referral_given",
+          message: "You referred Sarah Miller to Mike Chen",
+          detail: "Website redesign project • $3,200",
+          honeyPoints: 8,
+          time: "2 hours ago",
+          icon: "fas fa-gift",
+          iconColor: "text-amber-500",
+          bgColor: "bg-amber-100",
+        },
+        {
+          id: 2,
+          type: "member_joined",
+          message: "Lisa Rodriguez joined through your referral",
+          detail: "Rodriguez CPA • New member",
+          honeyPoints: 10,
+          time: "1 day ago",
+          icon: "fas fa-user-plus",
+          iconColor: "text-blue-500",
+          bgColor: "bg-blue-100",
+        },
+        {
+          id: 3,
+          type: "referral_received",
+          message: "David Park referred Tom Wilson to you",
+          detail: "Personal training consultation",
+          honeyPoints: null,
+          time: "2 days ago",
+          icon: "fas fa-arrow-down",
+          iconColor: "text-emerald-500",
+          bgColor: "bg-emerald-100",
+        },
+        {
+          id: 4,
+          type: "referral_completed",
+          message: "Jennifer completed your referral to Alex",
+          detail: "Marketing consultation • $1,500",
+          honeyPoints: 5,
+          time: "3 days ago",
+          icon: "fas fa-check-circle",
+          iconColor: "text-green-500",
+          bgColor: "bg-green-100",
+        },
+        {
+          id: 5,
+          type: "meeting_attended",
+          message: "You attended the monthly network meeting",
+          detail: "Great connections made!",
+          honeyPoints: 3,
+          time: "5 days ago",
+          icon: "fas fa-handshake",
+          iconColor: "text-purple-500",
+          bgColor: "bg-purple-100",
+        },
+      ];
+
+      // Check authentication and redirect if not logged in
+      function requireAuth() {
+        auth.onAuthStateChanged((user) => {
+          if (!user) {
+            window.location.href = "index.html";
+          } else {
+            initializeDashboard(user);
+          }
+        });
+      }
+
+      // Initialize dashboard with user data
+      function initializeDashboard(user) {
+        // Update user info in header using the component
+        hiveHeader.updateUserInfo(user);
+
+        // Update welcome name
+        const userName = user.displayName || user.email.split("@")[0];
+        document.getElementById("welcome-name").textContent = userName.split(" ")[0] || userName;
+
+        // Populate recent activity
+        populateRecentActivity();
+
+        // Load user stats (in real app, fetch from database)
+        loadUserStats(user);
+      }
+
+      // Populate recent activity feed
+      function populateRecentActivity() {
+        const container = document.getElementById("recent-activity");
+        container.innerHTML = mockActivity
+          .map(
+            (activity) => `
+      <div class="activity-item">
+        <div class="flex items-start space-x-3">
+          <div class="w-10 h-10 rounded-full ${activity.bgColor} flex items-center justify-center flex-shrink-0">
+            <i class="${activity.icon} ${activity.iconColor} text-sm"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-slate-900 mb-1">${activity.message}</p>
+            <p class="text-xs text-gray-600">${activity.detail}</p>
+          </div>
+          <div class="text-right flex-shrink-0">
+            ${
+              activity.honeyPoints
+                ? `
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 mb-1">
+                +${activity.honeyPoints} honey
+              </span>
+            `
+                : ""
+            }
+            <p class="text-xs text-gray-500">${activity.time}</p>
+          </div>
+        </div>
+      </div>
+    `
+          )
+          .join("");
+      }
+
+      // Load user statistics (replace with real database calls)
+      function loadUserStats(user) {
+        // In a real app, you'd fetch this from your database
+      }
+
+      // Initialize dashboard when page loads
+      document.addEventListener("DOMContentLoaded", () => {
+        requireAuth();
+      });
+    </script>
   </body>
 </html>
