@@ -1,5 +1,40 @@
 /* header.css - Header Component Styles */
 
+/* Logo nav link */
+/* Logo Navigation Link */
+.logo-nav-link {
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+  margin: -0.25rem;
+}
+
+.logo-nav-link:hover {
+  background-color: #f8fafc;
+  transform: translateY(-1px);
+}
+
+.logo-nav-link:hover h1 {
+  color: #f59e0b;
+}
+
+.logo-nav-link:hover p {
+  color: #d97706;
+}
+
+/* Ensure the logo maintains its styling */
+.logo-nav-link h1 {
+  color: #1e293b;
+  transition: color 0.2s ease;
+}
+
+.logo-nav-link p {
+  color: #6b7280;
+  transition: color 0.2s ease;
+}
+
 /* Desktop Navigation */
 .nav-link {
   display: flex;

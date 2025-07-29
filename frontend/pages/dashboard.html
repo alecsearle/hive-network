@@ -8,9 +8,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
 
     <!-- Firebase SDKs -->
-    <!-- <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script> -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
     <!-- Include Header Component -->
     <link rel="stylesheet" href="../header.css" />
@@ -163,7 +163,7 @@
           </div>
           <div class="honey-badge">
             <i class="fas fa-star mr-2"></i>
-            <span id="honey-points">45</span> -Honey Points
+            <span id="honey-points">45</span> &nbspHoney Points
           </div>
         </div>
       </div>
@@ -368,12 +368,42 @@
 
       // Initialize dashboard with user data
       function initializeDashboard(user) {
-        // Update user info in header using the component
-        hiveHeader.updateUserInfo(user);
+        // Create user info object with email
+        const userInfo = {
+          email: user.email,
+          displayName: user.displayName || user.email.split("@")[0],
+          // Add other fields as needed
+        };
 
-        // Update welcome name
+        // Update user info in header using the component
+        hiveHeader.updateUserInfo(userInfo);
+
+        // Update welcome message with user's first name or email
         const userName = user.displayName || user.email.split("@")[0];
-        document.getElementById("welcome-name").textContent = userName.split(" ")[0] || userName;
+        const welcomeName = userName.split(" ")[0] || userName;
+        document.getElementById("welcome-name").textContent = welcomeName;
+
+        // Optional: Try to get additional user data from Firestore
+        db.collection("hive_users")
+          .doc(user.uid)
+          .get()
+          .then((doc) => {
+            if (doc.exists) {
+              const userData = doc.data();
+              // Update with database info if available
+              const fullName = userData.displayName || userName;
+              const firstName = fullName.split(" ")[0] || fullName;
+              document.getElementById("welcome-name").textContent = firstName;
+
+              // Update honey points from database
+              if (userData.honeyPoints) {
+                document.getElementById("honey-points").textContent = userData.honeyPoints;
+              }
+            }
+          })
+          .catch((error) => {
+            console.log("No additional user data found, using auth info");
+          });
 
         // Populate recent activity
         populateRecentActivity();

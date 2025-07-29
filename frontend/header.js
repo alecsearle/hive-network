@@ -18,16 +18,19 @@ class HiveHeader {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between items-center h-16">
             <!-- Logo -->
-            <div class="flex items-center">
-              <div class="w-10 h-10 rounded-lg flex items-center justify-center mr-3">
-                <!-- Bee Logo -->
-                <img src="../assets/bee-logo.png" alt="bee logo" />
+            <!-- Logo -->
+            <a href="dashboard.html" class="logo-nav-link ${this.currentPage === "dashboard" ? "active" : ""}">
+              <div class="flex items-center">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center mr-3">
+                  <!-- Bee Logo -->
+                  <img src="../assets/bee-logo.png" alt="bee logo" />
+                </div>
+                <div>
+                  <h1 class="text-xl font-bold text-slate-800">Hive Network</h1>
+                  <p class="text-xs text-gray-500 hidden lg:block">Saint George Chapter</p>
+                </div>
               </div>
-              <div>
-                <h1 class="text-xl font-bold text-slate-800">Hive Network</h1>
-                <p class="text-xs text-gray-500 hidden lg:block">Saint George Chapter</p>
-              </div>
-            </div>
+            </a>
 
             <!-- Navigation -->
             <nav class="hidden md:flex">
@@ -51,10 +54,6 @@ class HiveHeader {
 
             <!-- User Menu Desktop -->
             <div class="hidden lg:flex items-center space-x-4">
-              <button class="relative p-2 text-gray-600 hover:text-slate-900 rounded-lg transition-colors">
-                <i class="fas fa-bell text-lg"></i>
-                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">2</span>
-              </button>
               <div class="flex items-center space-x-3">
                 <div id="user-avatar" class="w-8 h-8 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center">
                   <span class="text-white font-medium text-sm">JS</span>
@@ -211,6 +210,7 @@ class HiveHeader {
   updateUserInfo(user) {
     this.user = user;
     const userName = user.displayName || user.email.split("@")[0];
+    const userEmail = user.email; // Add this line
     const userInitials = userName
       .split(" ")
       .map((n) => n[0])
@@ -223,6 +223,8 @@ class HiveHeader {
 
     if (userNameElement) {
       userNameElement.textContent = userName;
+      // Optional: Show email on hover or as subtitle
+      userNameElement.title = userEmail;
     }
 
     if (userAvatarElement) {
@@ -236,6 +238,7 @@ class HiveHeader {
 
     if (userNameMobileElement) {
       userNameMobileElement.textContent = userName;
+      userNameMobileElement.title = userEmail;
     }
 
     if (userAvatarMobileElement) {
