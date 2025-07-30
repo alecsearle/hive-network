@@ -8,9 +8,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
 
     <!-- Firebase SDKs -->
-    <!-- <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script> -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
     <!-- Include Header Component -->
     <link rel="stylesheet" href="../header.css" />
@@ -147,6 +147,21 @@
       .activity-item:last-child {
         border-bottom: none;
       }
+
+      .loading-skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+      }
+
+      @keyframes loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
     </style>
   </head>
   <body class="bg-gray-50 text-gray-900">
@@ -158,12 +173,12 @@
       <div class="mb-8 slide-in-up">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div class="mb-4 sm:mb-0">
-            <h1 class="text-3xl font-bold text-slate-900 mb-2">Welcome back, <span id="welcome-name">John Smith</span>!</h1>
-            <p class="text-lg text-gray-600">You've given 12 honey referrals and received 8 this month.</p>
+            <h1 class="text-3xl font-bold text-slate-900 mb-2">Welcome back, <span id="welcome-name">Loading...</span>!</h1>
+            <p class="text-lg text-gray-600">You've given <span id="referrals-given-text">-</span> honey referrals and received <span id="referrals-received-text">-</span> this month.</p>
           </div>
           <div class="honey-badge">
             <i class="fas fa-star mr-2"></i>
-            <span id="honey-points">45</span> &nbspHoney Points
+            <span id="honey-points">0</span> &nbspHoney Points
           </div>
         </div>
       </div>
@@ -176,9 +191,9 @@
             <div class="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center">
               <i class="fas fa-gift text-white text-xl"></i>
             </div>
-            <span class="text-sm text-emerald-600 font-medium">+3 this month</span>
+            <span class="text-sm text-emerald-600 font-medium">+<span id="referrals-given-month">0</span> this month</span>
           </div>
-          <h3 class="text-3xl font-bold text-amber-700 mb-1">12</h3>
+          <h3 class="text-3xl font-bold text-amber-700 mb-1"><span id="referrals-given-total">0</span></h3>
           <p class="text-sm text-amber-700 font-medium">Referrals Given</p>
           <p class="text-xs text-amber-600 mt-1">Helping others grow</p>
         </div>
@@ -189,9 +204,9 @@
             <div class="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center">
               <i class="fas fa-arrow-down text-white text-xl"></i>
             </div>
-            <span class="text-sm text-emerald-600 font-medium">+2 this month</span>
+            <span class="text-sm text-emerald-600 font-medium">+<span id="referrals-received-month">0</span> this month</span>
           </div>
-          <h3 class="text-3xl font-bold text-emerald-700 mb-1">8</h3>
+          <h3 class="text-3xl font-bold text-emerald-700 mb-1"><span id="referrals-received-total">0</span></h3>
           <p class="text-sm text-emerald-700 font-medium">Referrals Received</p>
           <p class="text-xs text-emerald-600 mt-1">Growing your business</p>
         </div>
@@ -202,9 +217,9 @@
             <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
               <i class="fas fa-user-plus text-white text-xl"></i>
             </div>
-            <span class="text-sm text-emerald-600 font-medium">+1 this month</span>
+            <span class="text-sm text-emerald-600 font-medium">+<span id="members-introduced-month">0</span> this month</span>
           </div>
-          <h3 class="text-3xl font-bold text-blue-700 mb-1">3</h3>
+          <h3 class="text-3xl font-bold text-blue-700 mb-1"><span id="members-introduced-total">0</span></h3>
           <p class="text-sm text-blue-700 font-medium">Members Introduced</p>
           <p class="text-xs text-blue-600 mt-1">Growing the hive</p>
         </div>
@@ -215,9 +230,9 @@
             <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
               <i class="fas fa-trophy text-white text-xl"></i>
             </div>
-            <span class="text-sm text-emerald-600 font-medium">↑2 this month</span>
+            <span class="text-sm text-emerald-600 font-medium" id="rank-change">--</span>
           </div>
-          <h3 class="text-3xl font-bold text-purple-700 mb-1">#3</h3>
+          <h3 class="text-3xl font-bold text-purple-700 mb-1">#<span id="network-rank">--</span></h3>
           <p class="text-sm text-purple-700 font-medium">Network Rank</p>
           <p class="text-xs text-purple-600 mt-1">Top performer</p>
         </div>
@@ -257,6 +272,15 @@
           </div>
           <div id="recent-activity" class="max-h-80 overflow-y-auto">
             <!-- Activity items will be populated by JavaScript -->
+            <div class="activity-item">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-gray-200 loading-skeleton"></div>
+                <div class="flex-1">
+                  <div class="h-4 bg-gray-200 rounded loading-skeleton mb-2"></div>
+                  <div class="h-3 bg-gray-200 rounded loading-skeleton w-2/3"></div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="p-4 bg-gray-50 text-center border-t border-gray-100">
             <a href="referrals.html" class="text-amber-600 hover:text-amber-700 text-sm font-medium transition-colors"> View All Activity → </a>
@@ -296,165 +320,524 @@
       const auth = firebase.auth();
       const db = firebase.firestore();
 
-      // Mock data for development
-      const mockActivity = [
-        {
-          id: 1,
-          type: "referral_given",
-          message: "You referred Sarah Miller to Mike Chen",
-          detail: "Website redesign project • $3,200",
-          honeyPoints: 8,
-          time: "2 hours ago",
-          icon: "fas fa-gift",
-          iconColor: "text-amber-500",
-          bgColor: "bg-amber-100",
-        },
-        {
-          id: 2,
-          type: "member_joined",
-          message: "Lisa Rodriguez joined through your referral",
-          detail: "Rodriguez CPA • New member",
-          honeyPoints: 10,
-          time: "1 day ago",
-          icon: "fas fa-user-plus",
-          iconColor: "text-blue-500",
-          bgColor: "bg-blue-100",
-        },
-        {
-          id: 3,
-          type: "referral_received",
-          message: "David Park referred Tom Wilson to you",
-          detail: "Personal training consultation",
-          honeyPoints: null,
-          time: "2 days ago",
-          icon: "fas fa-arrow-down",
-          iconColor: "text-emerald-500",
-          bgColor: "bg-emerald-100",
-        },
-        {
-          id: 4,
-          type: "referral_completed",
-          message: "Jennifer completed your referral to Alex",
-          detail: "Marketing consultation • $1,500",
-          honeyPoints: 5,
-          time: "3 days ago",
-          icon: "fas fa-check-circle",
-          iconColor: "text-green-500",
-          bgColor: "bg-green-100",
-        },
-        {
-          id: 5,
-          type: "meeting_attended",
-          message: "You attended the monthly network meeting",
-          detail: "Great connections made!",
-          honeyPoints: 3,
-          time: "5 days ago",
-          icon: "fas fa-handshake",
-          iconColor: "text-purple-500",
-          bgColor: "bg-purple-100",
-        },
-      ];
+      let currentUser = null;
+      let userData = null;
 
       // Check authentication and redirect if not logged in
       function requireAuth() {
         auth.onAuthStateChanged((user) => {
           if (!user) {
-            window.location.href = "index.html";
+            window.location.href = "../index.html";
           } else {
+            currentUser = user;
             initializeDashboard(user);
           }
         });
       }
 
+      // Create or update user document in Firestore (using recentActivity collection for testing)
+      async function createOrUpdateUserDocument(user) {
+        const userRef = db.collection("recentActivity").doc(`user_${user.uid}`);
+
+        try {
+          const userDoc = await userRef.get();
+
+          if (!userDoc.exists) {
+            // Create new user document with default values
+            const newUserData = {
+              // Add type field to identify this as a user profile
+              type: "user_profile",
+
+              // Basic Info
+              email: user.email,
+              displayName: user.displayName || user.email.split("@")[0],
+              photoURL: user.photoURL || null,
+              joinDate: firebase.firestore.FieldValue.serverTimestamp(),
+              lastLoginDate: firebase.firestore.FieldValue.serverTimestamp(),
+
+              // Profile Info
+              firstName: (user.displayName || user.email.split("@")[0]).split(" ")[0],
+              lastName: (user.displayName || "").split(" ")[1] || "",
+              company: "",
+              jobTitle: "",
+              phone: "",
+              bio: "",
+
+              // Hive Network Stats
+              honeyPoints: 0,
+              referralsGiven: {
+                total: 0,
+                thisMonth: 0,
+                thisYear: 0,
+              },
+              referralsReceived: {
+                total: 0,
+                thisMonth: 0,
+                thisYear: 0,
+              },
+              membersIntroduced: {
+                total: 0,
+                thisMonth: 0,
+                thisYear: 0,
+              },
+              networkRank: null,
+              rankChange: null,
+
+              // Activity & Engagement
+              meetingsAttended: 0,
+              lastMeetingDate: null,
+              profileCompleted: false,
+              isActive: true,
+
+              // Settings & Preferences
+              emailNotifications: true,
+              smsNotifications: false,
+              profileVisibility: "public", // public, members-only, private
+
+              // Business Info
+              businessCategory: "",
+              services: [],
+              website: "",
+              address: {
+                street: "",
+                city: "Saint George",
+                state: "UT",
+                zipCode: "",
+                country: "USA",
+              },
+
+              // Social Links
+              socialLinks: {
+                linkedin: "",
+                facebook: "",
+                instagram: "",
+                twitter: "",
+              },
+            };
+
+            await userRef.set(newUserData);
+            console.log("New user document created");
+            return newUserData;
+          } else {
+            // Update last login date for existing user
+            await userRef.update({
+              lastLoginDate: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+
+            return userDoc.data();
+          }
+        } catch (error) {
+          console.error("Error creating/updating user document:", error);
+          return null;
+        }
+      }
+
       // Initialize dashboard with user data
-      function initializeDashboard(user) {
-        // Create user info object with email
-        const userInfo = {
-          email: user.email,
-          displayName: user.displayName || user.email.split("@")[0],
-          // Add other fields as needed
-        };
+      async function initializeDashboard(user) {
+        try {
+          // Create or get user document
+          userData = await createOrUpdateUserDocument(user);
 
-        // Update user info in header using the component
-        hiveHeader.updateUserInfo(userInfo);
+          if (!userData) {
+            console.error("Failed to load user data");
+            return;
+          }
 
-        // Update welcome message with user's first name or email
-        const userName = user.displayName || user.email.split("@")[0];
-        const welcomeName = userName.split(" ")[0] || userName;
-        document.getElementById("welcome-name").textContent = welcomeName;
+          // Update user info in header using the component
+          const userInfo = {
+            email: user.email,
+            displayName: userData.displayName || user.displayName || user.email.split("@")[0],
+            photoURL: userData.photoURL || user.photoURL,
+          };
 
-        // Optional: Try to get additional user data from Firestore
-        db.collection("hive_users")
-          .doc(user.uid)
-          .get()
-          .then((doc) => {
-            if (doc.exists) {
-              const userData = doc.data();
-              // Update with database info if available
-              const fullName = userData.displayName || userName;
-              const firstName = fullName.split(" ")[0] || fullName;
-              document.getElementById("welcome-name").textContent = firstName;
+          if (typeof hiveHeader !== "undefined") {
+            hiveHeader.updateUserInfo(userInfo);
+          }
 
-              // Update honey points from database
-              if (userData.honeyPoints) {
-                document.getElementById("honey-points").textContent = userData.honeyPoints;
-              }
+          // Update dashboard with user data
+          updateDashboardContent(userData);
+
+          // Load recent activity
+          await loadRecentActivity(user.uid);
+        } catch (error) {
+          console.error("Error initializing dashboard:", error);
+        }
+      }
+
+      // Update dashboard content with user data
+      function updateDashboardContent(userData) {
+        // Update welcome message
+        const firstName = userData.firstName || userData.displayName.split(" ")[0] || userData.email.split("@")[0];
+        document.getElementById("welcome-name").textContent = firstName;
+
+        // Update honey points
+        document.getElementById("honey-points").textContent = userData.honeyPoints || 0;
+
+        // Update referrals summary
+        document.getElementById("referrals-given-text").textContent = userData.referralsGiven?.thisMonth || 0;
+        document.getElementById("referrals-received-text").textContent = userData.referralsReceived?.thisMonth || 0;
+
+        // Update stats cards
+        document.getElementById("referrals-given-total").textContent = userData.referralsGiven?.total || 0;
+        document.getElementById("referrals-given-month").textContent = userData.referralsGiven?.thisMonth || 0;
+
+        document.getElementById("referrals-received-total").textContent = userData.referralsReceived?.total || 0;
+        document.getElementById("referrals-received-month").textContent = userData.referralsReceived?.thisMonth || 0;
+
+        document.getElementById("members-introduced-total").textContent = userData.membersIntroduced?.total || 0;
+        document.getElementById("members-introduced-month").textContent = userData.membersIntroduced?.thisMonth || 0;
+
+        // Update network rank
+        if (userData.networkRank) {
+          document.getElementById("network-rank").textContent = userData.networkRank;
+
+          if (userData.rankChange) {
+            const rankChangeEl = document.getElementById("rank-change");
+            if (userData.rankChange > 0) {
+              rankChangeEl.textContent = `↑${userData.rankChange} this month`;
+              rankChangeEl.className = "text-sm text-emerald-600 font-medium";
+            } else if (userData.rankChange < 0) {
+              rankChangeEl.textContent = `↓${Math.abs(userData.rankChange)} this month`;
+              rankChangeEl.className = "text-sm text-red-600 font-medium";
+            } else {
+              rankChangeEl.textContent = "No change";
+              rankChangeEl.className = "text-sm text-gray-600 font-medium";
             }
-          })
-          .catch((error) => {
-            console.log("No additional user data found, using auth info");
+          }
+        } else {
+          document.getElementById("network-rank").textContent = "--";
+          document.getElementById("rank-change").textContent = "New member";
+        }
+      }
+
+      // Load recent activity from Firestore (using recentActivity collection)
+      async function loadRecentActivity(userId) {
+        try {
+          const activityRef = db.collection("recentActivity").where("userId", "==", userId).orderBy("timestamp", "desc").limit(10);
+
+          const snapshot = await activityRef.get();
+
+          if (snapshot.empty) {
+            // Show mock data if no real activity exists
+            populateRecentActivity(getMockActivity());
+            return;
+          }
+
+          const activities = [];
+          snapshot.forEach((doc) => {
+            activities.push({ id: doc.id, ...doc.data() });
           });
 
-        // Populate recent activity
-        populateRecentActivity();
+          populateRecentActivity(activities);
+        } catch (error) {
+          console.error("Error loading recent activity:", error);
+          // Fallback to mock data
+          populateRecentActivity(getMockActivity());
+        }
+      }
 
-        // Load user stats (in real app, fetch from database)
-        loadUserStats(user);
+      // Get mock activity data
+      function getMockActivity() {
+        return [
+          {
+            id: 1,
+            type: "referral_given",
+            message: "You referred Sarah Miller to Mike Chen",
+            detail: "Website redesign project • $3,200",
+            honeyPoints: 8,
+            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+            icon: "fas fa-gift",
+            iconColor: "text-amber-500",
+            bgColor: "bg-amber-100",
+          },
+          {
+            id: 2,
+            type: "member_joined",
+            message: "Lisa Rodriguez joined through your referral",
+            detail: "Rodriguez CPA • New member",
+            honeyPoints: 10,
+            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+            icon: "fas fa-user-plus",
+            iconColor: "text-blue-500",
+            bgColor: "bg-blue-100",
+          },
+          {
+            id: 3,
+            type: "referral_received",
+            message: "David Park referred Tom Wilson to you",
+            detail: "Personal training consultation",
+            honeyPoints: null,
+            timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+            icon: "fas fa-arrow-down",
+            iconColor: "text-emerald-500",
+            bgColor: "bg-emerald-100",
+          },
+          {
+            id: 4,
+            type: "referral_completed",
+            message: "Jennifer completed your referral to Alex",
+            detail: "Marketing consultation • $1,500",
+            honeyPoints: 5,
+            timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+            icon: "fas fa-check-circle",
+            iconColor: "text-green-500",
+            bgColor: "bg-green-100",
+          },
+          {
+            id: 5,
+            type: "meeting_attended",
+            message: "You attended the monthly network meeting",
+            detail: "Great connections made!",
+            honeyPoints: 3,
+            timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+            icon: "fas fa-handshake",
+            iconColor: "text-purple-500",
+            bgColor: "bg-purple-100",
+          },
+        ];
+      }
+
+      // Format timestamp for display
+      function formatTimeAgo(timestamp) {
+        const now = new Date();
+        const activityTime = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        const diffInSeconds = Math.floor((now - activityTime) / 1000);
+
+        if (diffInSeconds < 60) return "Just now";
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+
+        return activityTime.toLocaleDateString();
       }
 
       // Populate recent activity feed
-      function populateRecentActivity() {
+      function populateRecentActivity(activities) {
         const container = document.getElementById("recent-activity");
-        container.innerHTML = mockActivity
+
+        if (activities.length === 0) {
+          container.innerHTML = `
+            <div class="activity-item text-center py-8">
+              <div class="text-gray-500">
+                <i class="fas fa-history text-3xl mb-4"></i>
+                <p>No recent activity yet.</p>
+                <p class="text-sm mt-2">Start making referrals to see your activity here!</p>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = activities
           .map(
             (activity) => `
-      <div class="activity-item">
-        <div class="flex items-start space-x-3">
-          <div class="w-10 h-10 rounded-full ${activity.bgColor} flex items-center justify-center flex-shrink-0">
-            <i class="${activity.icon} ${activity.iconColor} text-sm"></i>
+          <div class="activity-item">
+            <div class="flex items-start space-x-3">
+              <div class="w-10 h-10 rounded-full ${activity.bgColor} flex items-center justify-center flex-shrink-0">
+                <i class="${activity.icon} ${activity.iconColor} text-sm"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-slate-900 mb-1">${activity.message}</p>
+                <p class="text-xs text-gray-600">${activity.detail}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                ${
+                  activity.honeyPoints
+                    ? `
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 mb-1">
+                    +${activity.honeyPoints} honey
+                  </span>
+                `
+                    : ""
+                }
+                <p class="text-xs text-gray-500">${formatTimeAgo(activity.timestamp)}</p>
+              </div>
+            </div>
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-slate-900 mb-1">${activity.message}</p>
-            <p class="text-xs text-gray-600">${activity.detail}</p>
-          </div>
-          <div class="text-right flex-shrink-0">
-            ${
-              activity.honeyPoints
-                ? `
-              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 mb-1">
-                +${activity.honeyPoints} honey
-              </span>
-            `
-                : ""
-            }
-            <p class="text-xs text-gray-500">${activity.time}</p>
-          </div>
-        </div>
-      </div>
-    `
+        `
           )
           .join("");
       }
 
-      // Load user statistics (replace with real database calls)
-      function loadUserStats(user) {
-        // In a real app, you'd fetch this from your database
+      // Utility function to update user stats (using recentActivity collection)
+      async function updateUserStats(userId, statType, increment = 1) {
+        const userRef = db.collection("recentActivity").doc(`user_${userId}`);
+
+        try {
+          await db.runTransaction(async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+
+            if (!userDoc.exists) {
+              throw new Error("User document does not exist!");
+            }
+
+            const userData = userDoc.data();
+            const updates = {};
+
+            // Update specific stat
+            if (statType === "referralGiven") {
+              updates[`referralsGiven.total`] = (userData.referralsGiven?.total || 0) + increment;
+              updates[`referralsGiven.thisMonth`] = (userData.referralsGiven?.thisMonth || 0) + increment;
+              updates.honeyPoints = (userData.honeyPoints || 0) + increment * 5; // 5 points per referral
+            } else if (statType === "referralReceived") {
+              updates[`referralsReceived.total`] = (userData.referralsReceived?.total || 0) + increment;
+              updates[`referralsReceived.thisMonth`] = (userData.referralsReceived?.thisMonth || 0) + increment;
+            } else if (statType === "memberIntroduced") {
+              updates[`membersIntroduced.total`] = (userData.membersIntroduced?.total || 0) + increment;
+              updates[`membersIntroduced.thisMonth`] = (userData.membersIntroduced?.thisMonth || 0) + increment;
+              updates.honeyPoints = (userData.honeyPoints || 0) + increment * 10; // 10 points per new member
+            }
+
+            transaction.update(userRef, updates);
+          });
+
+          console.log(`User stats updated: ${statType}`);
+        } catch (error) {
+          console.error("Error updating user stats:", error);
+        }
+      }
+
+      // Add activity to user's activity log (using recentActivity collection)
+      async function addUserActivity(userId, activityData) {
+        try {
+          await db.collection("recentActivity").add({
+            userId: userId,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            ...activityData,
+          });
+
+          console.log("Activity logged successfully");
+        } catch (error) {
+          console.error("Error logging activity:", error);
+        }
+      }
+
+      // Example function to make a referral (you can call this from your referral form)
+      async function makeReferral(referralData) {
+        if (!currentUser) return;
+
+        try {
+          // Add referral to recentActivity collection (since referrals collection is locked)
+          const referralRef = await db.collection("recentActivity").add({
+            type: "referral_record",
+            fromUserId: currentUser.uid,
+            toUserId: referralData.toUserId,
+            referredPersonName: referralData.referredPersonName,
+            referredPersonEmail: referralData.referredPersonEmail,
+            referredPersonPhone: referralData.referredPersonPhone,
+            serviceNeeded: referralData.serviceNeeded,
+            estimatedValue: referralData.estimatedValue,
+            notes: referralData.notes,
+            status: "pending", // pending, accepted, completed, declined
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+
+          // Update user stats
+          await updateUserStats(currentUser.uid, "referralGiven");
+
+          // Log activity
+          await addUserActivity(currentUser.uid, {
+            type: "referral_given",
+            message: `You referred ${referralData.referredPersonName} to ${referralData.toUserName}`,
+            detail: `${referralData.serviceNeeded} • ${referralData.estimatedValue}`,
+            honeyPoints: 5,
+            icon: "fas fa-gift",
+            iconColor: "text-amber-500",
+            bgColor: "bg-amber-100",
+            referralId: referralRef.id,
+          });
+
+          // Refresh dashboard
+          await initializeDashboard(currentUser);
+
+          console.log("Referral created successfully");
+        } catch (error) {
+          console.error("Error making referral:", error);
+        }
+      }
+
+      // Reset monthly stats (call this function at the beginning of each month)
+      async function resetMonthlyStats() {
+        try {
+          const usersRef = db.collection("hive_users");
+          const snapshot = await usersRef.get();
+
+          const batch = db.batch();
+
+          snapshot.forEach((doc) => {
+            const userRef = usersRef.doc(doc.id);
+            batch.update(userRef, {
+              "referralsGiven.thisMonth": 0,
+              "referralsReceived.thisMonth": 0,
+              "membersIntroduced.thisMonth": 0,
+            });
+          });
+
+          await batch.commit();
+          console.log("Monthly stats reset successfully");
+        } catch (error) {
+          console.error("Error resetting monthly stats:", error);
+        }
+      }
+
+      // Calculate and update network rankings
+      async function updateNetworkRankings() {
+        try {
+          const usersRef = db.collection("hive_users");
+          const snapshot = await usersRef.where("isActive", "==", true).orderBy("honeyPoints", "desc").get();
+
+          const batch = db.batch();
+          let rank = 1;
+
+          snapshot.forEach((doc) => {
+            const userRef = usersRef.doc(doc.id);
+            const currentRank = doc.data().networkRank;
+            const rankChange = currentRank ? currentRank - rank : null;
+
+            batch.update(userRef, {
+              networkRank: rank,
+              rankChange: rankChange,
+            });
+
+            rank++;
+          });
+
+          await batch.commit();
+          console.log("Network rankings updated successfully");
+        } catch (error) {
+          console.error("Error updating network rankings:", error);
+        }
+      }
+
+      // Get user profile completion percentage
+      function getProfileCompletionPercentage(userData) {
+        const requiredFields = ["firstName", "lastName", "company", "jobTitle", "phone", "bio", "businessCategory", "website"];
+
+        const completedFields = requiredFields.filter((field) => {
+          const value = userData[field];
+          return value && value.toString().trim() !== "";
+        });
+
+        return Math.round((completedFields.length / requiredFields.length) * 100);
       }
 
       // Initialize dashboard when page loads
       document.addEventListener("DOMContentLoaded", () => {
         requireAuth();
       });
+
+      // Export functions for use in other parts of the application
+      window.hiveNetwork = {
+        updateUserStats,
+        addUserActivity,
+        makeReferral,
+        resetMonthlyStats,
+        updateNetworkRankings,
+        getProfileCompletionPercentage,
+        currentUser: () => currentUser,
+        userData: () => userData,
+      };
     </script>
   </body>
 </html>

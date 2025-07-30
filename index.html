@@ -336,7 +336,7 @@
     </div>
 
     <script>
-      // Firebase Configuration
+      // Firebase Configuration - Replace with your own config
       const firebaseConfig = {
         apiKey: "AIzaSyDLvSac-aX8I9ueFbhoRDNPHm2hDqp_LF0",
         authDomain: "buzz-academy.firebaseapp.com",
@@ -363,77 +363,8 @@
       const signinText = document.getElementById("signin-text");
       const signinLoading = document.getElementById("signin-loading");
 
-      // Function to create Firestore user profile
-      async function createUserProfile(user) {
-        try {
-          const userProfile = {
-            // Firebase Auth data
-            email: user.email,
-            displayName: user.displayName || user.email.split("@")[0],
-
-            // Hive Network specific data with defaults
-            business: "", // They'll need to update this
-            industry: "", // They'll choose this later
-            specialties: [],
-            phone: "",
-            location: "Saint George, UT", // Default location
-            joinDate: firebase.firestore.FieldValue.serverTimestamp(),
-            honeyPoints: 5, // Start with welcome bonus
-            isActive: true,
-
-            // Initialize stats
-            stats: {
-              referralsGiven: 0,
-              referralsReceived: 0,
-              referralsCompleted: 0,
-              meetingsAttended: 0,
-              networkRank: 999, // Will be calculated later
-              totalBusinessValue: 0,
-            },
-
-            // Metadata
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-
-            // Profile completion tracking
-            profileComplete: false, // They need to add business info
-            profileCompletedAt: null,
-          };
-
-          // Create document using Firebase Auth UID as document ID
-          await db.collection("hive_users").doc(user.uid).set(userProfile);
-
-          console.log("User profile created successfully");
-
-          // Award welcome bonus
-          await awardWelcomeBonus(user.uid);
-        } catch (error) {
-          console.error("Error creating user profile:", error);
-        }
-      }
-
-      // Award welcome bonus
-      async function awardWelcomeBonus(userId) {
-        try {
-          // Add welcome transaction
-          await db.collection("hive_honey_transactions").add({
-            userId: userId,
-            type: "welcome_bonus",
-            points: 5,
-            description: "Welcome to Hive Network!",
-            referenceId: null,
-            referenceType: "bonus",
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-
-          console.log("Welcome bonus awarded");
-        } catch (error) {
-          console.error("Error awarding welcome bonus:", error);
-        }
-      }
-
-      // Updated Email/Password Authentication
-      authForm.addEventListener("submit", async (e) => {
+      // Email/Password Authentication
+      authForm.addEventListener("submit", (e) => {
         e.preventDefault();
         signinText.classList.add("hidden");
         signinLoading.classList.remove("hidden");
@@ -441,40 +372,21 @@
         const email = emailInput.value;
         const password = passwordInput.value;
 
-        try {
-          // Try to sign in first
-          await auth.signInWithEmailAndPassword(email, password);
-        } catch (signInError) {
-          try {
-            // If sign in fails, create new account
-            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-            const user = userCredential.user;
-
-            // 🔥 AUTOMATICALLY CREATE FIRESTORE PROFILE
-            await createUserProfile(user);
-          } catch (createError) {
-            alert(createError.message);
+        // Try to sign in first, create account if it doesn't exist
+        auth
+          .signInWithEmailAndPassword(email, password)
+          .catch(() => auth.createUserWithEmailAndPassword(email, password))
+          .catch((err) => {
+            alert(err.message);
             signinText.classList.remove("hidden");
             signinLoading.classList.add("hidden");
-          }
-        }
+          });
       });
 
-      // Updated Google Authentication
-      googleSigninBtn.addEventListener("click", async () => {
-        try {
-          const provider = new firebase.auth.GoogleAuthProvider();
-          const result = await auth.signInWithPopup(provider);
-          const user = result.user;
-
-          // Check if user profile exists, create if not
-          const userDoc = await db.collection("hive_users").doc(user.uid).get();
-          if (!userDoc.exists) {
-            await createUserProfile(user);
-          }
-        } catch (error) {
-          alert(error.message);
-        }
+      // Google Authentication
+      googleSigninBtn.addEventListener("click", () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch((err) => alert(err.message));
       });
 
       // Logout
@@ -510,6 +422,13 @@
 
       // Custom function that runs after successful authentication
       function onUserSignedIn(user) {
+        // Add your custom logic here
+        // Examples:
+        // - Redirect to a specific page
+        // - Load user-specific data
+        // - Initialize app features
+        // - Track analytics
+
         window.location.href = "./frontend/pages/dashboard.html";
 
         console.log("User authenticated successfully:", {
@@ -518,6 +437,15 @@
           displayName: user.displayName,
           photoURL: user.photoURL,
         });
+
+        // Example: Save user login to Firestore (optional)
+        /*
+    db.collection('userSessions').add({
+      email: user.email,
+      loginTime: firebase.firestore.FieldValue.serverTimestamp(),
+      userAgent: navigator.userAgent
+    }).catch(err => console.error('Error logging session:', err));
+    */
       }
     </script>
   </body>
