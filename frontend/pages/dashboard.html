@@ -259,6 +259,16 @@
               <i class="fas fa-calendar"></i>
               View Meetings
             </a>
+            <!-- TEST BUTTON: Remove this later -->
+            <button onclick="testAddHoneyPoints()" class="quick-action-btn" style="--btn-from: #8b5cf6; --btn-to: #7c3aed">
+              <i class="fas fa-star"></i>
+              Test: Add 5 Honey Points
+            </button>
+            <!-- TEST BUTTON: Remove this later -->
+            <button onclick="testAddHoneyPoints()" class="quick-action-btn" style="--btn-from: #8b5cf6; --btn-to: #7c3aed">
+              <i class="fas fa-star"></i>
+              Test: Add 5 Honey Points
+            </button>
           </div>
         </div>
 
@@ -325,10 +335,13 @@
 
       // Check authentication and redirect if not logged in
       function requireAuth() {
+        console.log("🔐 Setting up auth state listener...");
         auth.onAuthStateChanged((user) => {
           if (!user) {
+            console.log("❌ No user authenticated, redirecting to login");
             window.location.href = "../index.html";
           } else {
+            console.log("✅ User authenticated:", user.email, "UID:", user.uid);
             currentUser = user;
             initializeDashboard(user);
           }
@@ -826,6 +839,49 @@
       document.addEventListener("DOMContentLoaded", () => {
         requireAuth();
       });
+
+      // TEST FUNCTION: Add honey points (using your structure)
+      async function testAddHoneyPoints() {
+        if (!currentUser) {
+          alert("Please log in first");
+          return;
+        }
+
+        console.log("🍯 Testing honey points addition...");
+
+        try {
+          const userRef = db.collection("hive_users").doc(currentUser.uid);
+
+          await db.runTransaction(async (transaction) => {
+            const userDoc = await transaction.get(userRef);
+
+            if (!userDoc.exists) {
+              throw new Error("User document does not exist!");
+            }
+
+            const userData = userDoc.data();
+            const currentPoints = userData.honeyPoints || 0;
+            const newPoints = currentPoints + 5;
+
+            console.log(`🍯 Updating honey points: ${currentPoints} → ${newPoints}`);
+
+            transaction.update(userRef, {
+              honeyPoints: newPoints,
+              updatedAt: new Date().toISOString(),
+            });
+          });
+
+          console.log("✅ Honey points updated successfully!");
+
+          // Refresh the dashboard to show new points
+          await initializeDashboard(currentUser);
+
+          alert("Added 5 honey points! Check your dashboard.");
+        } catch (error) {
+          console.error("❌ Error updating honey points:", error);
+          alert("Error updating honey points: " + error.message);
+        }
+      }
 
       // Export functions for use in other parts of the application
       window.hiveNetwork = {
