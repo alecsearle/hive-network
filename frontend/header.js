@@ -70,10 +70,6 @@ class HiveHeader {
 
             <!-- Mobile/Tablet Menu - Only shows below large screens -->
             <div class="lg:hidden flex items-center space-x-2">
-              <button class="relative p-2 text-gray-600 hover:text-slate-900 rounded-lg transition-colors">
-                <i class="fas fa-bell text-lg"></i>
-                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center text-xs">2</span>
-              </button>
               <div id="user-avatar-mobile" class="w-8 h-8 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center">
                 <span class="text-white font-medium text-sm">JS</span>
               </div>
